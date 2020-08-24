@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model activities {
+  id            Int       @default(autoincrement()) @id
+  description   String?
+  dt_prev       DateTime
+  dt_exec       DateTime?
+  statusId      Int
+  listId        Int
+  responsibleId String
+  lists         lists     @relation(fields: [listId], references: [id])
+  users         users     @relation(fields: [responsibleId], references: [id])
+  status        status    @relation(fields: [statusId], references: [id])
+}
+
+model categories {
+  id          Int     @default(autoincrement()) @id
+  description String?
+  lists       lists[]
+}
+
+model lists {
+  id          Int          @default(autoincrement()) @id
+  title       String
+  description String?
+  createdAt   DateTime     @default(now())
+  ownerId     String
+  categoryId  Int
+  categories  categories   @relation(fields: [categoryId], references: [id])
+  users       users        @relation(fields: [ownerId], references: [id])
+  activities  activities[]
+}
+
+model status {
+  id          Int          @default(autoincrement()) @id
+  description String?
+  activities  activities[]
+}
+
+model users {
+  id         String       @id
+  name       String?
+  phone      String       @unique
+  email      String       @unique
+  password   String
+  activities activities[]
+  lists      lists[]
+}
